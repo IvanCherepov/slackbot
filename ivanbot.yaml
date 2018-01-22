@@ -1,0 +1,43 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+  labels:
+    app: ivanbot
+  name: ivanbot-deployment
+  namespace: team-support
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ivanbot
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: ~
+      labels:
+        app: ivanbot
+    spec:
+      containers:
+        -
+          image: quay.io/ivancherepov/ivanslackbot
+          imagePullPolicy: Always
+          command: ["/ivanbot"]
+          env:
+            - name: SLACK_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: ivanslackbotsecret
+                  key: SLACK_TOKEN
+          name: ivanbot
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+        - name: ivanquaysecret
+      restartPolicy: Always
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
